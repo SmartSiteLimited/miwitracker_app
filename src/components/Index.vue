@@ -38,6 +38,7 @@
                 <option v-for="imei in imeis" :key="imei" :value="imei">{{ imei }}</option>
             </select> -->
             <div class="flex gap-4 flex-wrap mt-4 mb-4">
+                <input type="text" v-model="inputImei" placeholder="Enter the Specific Target IMEI" class="p-2 border rounded w-[400px]" />
                 <Button class="bg-red-300" @click="fetchDevices">Reload All Devices</Button>
                 <Button class="bg-red-300" @click="setSOS">Set SOS</Button>
                 <Button class="bg-red-300" @click="setPhoneBook">Set Phone Book</Button>
@@ -49,7 +50,7 @@
                 <Button class="bg-red-300" @click="locate">Locate</Button>
                 <Button class="bg-red-300" @click="reboot">Reboot</Button>
                 <Button class="bg-red-300" @click="powerOff">Power Off</Button>
-                <Button class="bg-red-300" @click="saveCallNumber">Save Call Number</Button>
+                <Button class="bg-red-300" @click="saveCallNumber" >Save Call Number</Button>
                 <Button class="bg-red-300" @click="savePhoneBooksettings">Save Phone Book</Button>
 
             </div>
@@ -115,9 +116,11 @@ const message = ref('')
 const result = ref('')
 const app_endpoint = 'http://localhost:8000'
 const projects = ref([])
+const target_list = ref('')
 const projectSettings = ref({})
 const imeis = ref([])
 const selectedProject = ref('')
+const inputImei = ref('')
 const Switch = ref("1") //default switch to on
 const created = ref('')
 //default the created date to today string
@@ -160,10 +163,12 @@ async function saveCallNumber() {
     }
     //split the call number by comma
     const callNumbersArray = callNumber.split(',').map(num => num.trim())
+    
 
     if (callNumber) {
         const formData = new FormData()
         formData.append('project', selectedProject.value)
+
         formData.append('callcenter_number', callNumbersArray)
         const { data } = await axios.post(`${app_endpoint}/set_callcenter_number`, formData)
         message.value = data.message
@@ -256,8 +261,10 @@ async function setSOS() {
     }
     const settings = projectSettings.value.call_center_number
     console.log('Settings for SOS:', settings)
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
     formData.append('project', selectedProject.value)
     formData.append('settings', settings)
+    formData.append('imeis', inputImeiArray)
     const { data } = await axios.post(`${app_endpoint}/set_sos`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -273,6 +280,8 @@ async function setPhoneBook() {
     if (created.value) {
         formData.append('created', created.value)
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     const settings = projectSettings.value.phone_number
     formData.append('settings' , settings)
     console.log('Settings for Phone Book:', settings)
@@ -282,8 +291,10 @@ async function setPhoneBook() {
 }
 async function checkOnline() {
     const formData = new FormData()
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
     formData.append('project', selectedProject.value)
     formData.append('created', created.value)
+    formData.append('imeis', inputImeiArray)
     const { data } = await axios.post(`${app_endpoint}/check_online`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -294,9 +305,13 @@ async function setBlockPhone() {
         message.value = 'Please select a date first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     formData.append('switch', Switch.value)
+    
+
     const { data } = await axios.post(`${app_endpoint}/set_block_phone`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -311,6 +326,8 @@ async function setHealth() {
         message.value = 'Please select a date first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     const { data } = await axios.post(`${app_endpoint}/set_health`, formData)
@@ -328,6 +345,8 @@ async function setCallCenter() {
         message.value = 'No call_center settings no. found for this project. Please set call_center first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('settings', projectSettings.value.call_center_number)
     const { data } = await axios.post(`${app_endpoint}/set_callcenter`, formData)
@@ -348,6 +367,8 @@ async function setAlert() {
         message.value = 'Please select a switch state first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('switch', Switch.value)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
@@ -366,6 +387,8 @@ async function locate() {
         message.value = 'Please select a date first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     
@@ -383,9 +406,11 @@ async function powerOff() {
         message.value = 'Please select a date first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
-    formData.append('switch', false)
+    formData.append('switch', "0")
     const { data } = await axios.post(`${app_endpoint}/power`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -396,8 +421,11 @@ async function reboot() {
         message.value = 'Please select a date first.'
         return
     }
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    formData.append('imeis', inputImeiArray)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
+    formData.append('switch', "1")
     const { data } = await axios.post(`${app_endpoint}/power`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
