@@ -52,10 +52,8 @@
                 <Button class="bg-red-300" @click="powerOff">Power Off</Button>
                 <Button class="bg-red-300" @click="saveCallNumber" >Save Call Number</Button>
                 <Button class="bg-red-300" @click="savePhoneBooksettings">Save Phone Book</Button>
-
+                <Button class="bg-red-300" @click="AddDeviceList">Add Device List</Button>
             </div>
-
-
         </div>
         <table class="p-4 border-1 border-solid" v-if="projects.length > 0">
             <thead>
@@ -116,15 +114,14 @@ const message = ref('')
 const result = ref('')
 const app_endpoint = 'http://localhost:8000'
 const projects = ref([])
-const target_list = ref('')
 const projectSettings = ref({})
 const imeis = ref([])
 const selectedProject = ref('')
 const inputImei = ref('')
 const Switch = ref("1") //default switch to on
 const created = ref('')
-//default the created date to today string
-created.value = new Date().toISOString().split('T')[0]
+//default the created date to tomorrow string
+created.value = new Date(Date.now() + 86400000).toISOString().split('T')[0]
 
 const phone_number_list = computed(() => {
     if (!imeis.value || imeis.value.length === 0) return []
@@ -152,6 +149,28 @@ const isOnline = (imei) => {
         return true
     } else {
         return false
+    }
+}
+
+async function AddDeviceList() {
+    const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
+    if (!inputImeiArray || inputImeiArray.length === 0) {
+        message.value = 'No IMEI numbers provided.'
+        return
+    }
+    const formData = new FormData()
+    formData.append('project', selectedProject.value)
+    formData.append('imeis', JSON.stringify(inputImeiArray))
+
+    try {
+        const { data } = await axios.post(`${app_endpoint}/add_list`, formData)
+        message.value = data.message
+        getImeisListByProject(created.value).then(() => {
+            fetchSettings()
+        })
+    } catch (error) {
+        console.error('Error adding device list:', error)
+        message.value = 'Failed to add device list.'
     }
 }
 
