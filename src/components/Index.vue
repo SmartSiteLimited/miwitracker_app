@@ -283,7 +283,9 @@ async function setSOS() {
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
     formData.append('project', selectedProject.value)
     formData.append('settings', settings)
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     const { data } = await axios.post(`${app_endpoint}/set_sos`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -300,7 +302,9 @@ async function setPhoneBook() {
         formData.append('created', created.value)
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     const settings = projectSettings.value.phone_number
     formData.append('settings' , settings)
     console.log('Settings for Phone Book:', settings)
@@ -313,7 +317,10 @@ async function checkOnline() {
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
     formData.append('project', selectedProject.value)
     formData.append('created', created.value)
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray) 
+    } 
+    console.log('created' , created.value)
     const { data } = await axios.post(`${app_endpoint}/check_online`, formData)
     message.value = data.message
     result.value = JSON.stringify(data.data, null, 2)
@@ -325,7 +332,9 @@ async function setBlockPhone() {
         return
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     formData.append('switch', Switch.value)
@@ -346,7 +355,9 @@ async function setHealth() {
         return
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     const { data } = await axios.post(`${app_endpoint}/set_health`, formData)
@@ -365,7 +376,9 @@ async function setCallCenter() {
         return
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     formData.append('created', created.value)
     formData.append('settings', projectSettings.value.call_center_number)
     const { data } = await axios.post(`${app_endpoint}/set_callcenter`, formData)
@@ -387,7 +400,9 @@ async function setAlert() {
         return
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     formData.append('switch', Switch.value)
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
@@ -407,7 +422,9 @@ async function locate() {
         return
     }
     const inputImeiArray = inputImei.value ? inputImei.value.split(',').map(num => num.trim()) : []
-    formData.append('imeis', inputImeiArray)
+    if (inputImeiArray.length > 0) {
+        formData.append('imeis', inputImeiArray)
+    }
     formData.append('created', created.value)
     formData.append('project', selectedProject.value)
     
