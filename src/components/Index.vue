@@ -112,7 +112,7 @@ import { Button } from '@/ui/button'
 
 const message = ref('')
 const result = ref('')
-const app_endpoint = 'http://localhost:8000'
+const app_endpoint = import.meta.env.VITE_API_URL;
 const projects = ref([])
 const projectSettings = ref({})
 const imeis = ref([])
