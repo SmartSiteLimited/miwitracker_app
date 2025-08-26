@@ -7,8 +7,8 @@ export const router = createRouter({
   routes: [
     
     {
-      path: '/mikitracker',
-      name: 'mikitracker',
+      path: '/',
+      name: 'miwitracker',
       component: Index
     }
   ]
