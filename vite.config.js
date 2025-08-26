@@ -18,10 +18,10 @@ export default defineConfig({
   },
   server: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://192.168.168.6:8005',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
       }
   },
-)  
+)
