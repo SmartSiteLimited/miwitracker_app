@@ -107,11 +107,11 @@ add the popup form with z-index 50
           </tr>
         </tbody>
       </table>
-      <div class="p-2 justify-between flex">
+      <!-- <div class="p-2 justify-between flex">
         <button type="button" class="border-blue-500 text-blue-500" @click="saveGroup">
           <i class="fal fa-save"></i> Save Changes
         </button>
-      </div>
+      </div> -->
       
     </div>
   </div>

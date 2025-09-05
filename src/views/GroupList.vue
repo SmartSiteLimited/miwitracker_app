@@ -136,15 +136,9 @@ const displayImeis = computed(() => {
     }
   }
   loading.value = false 
-  // groupOption.value = Array.from(new Set(founds.map(d => d.miwi_group_id).filter(g => g !== null && g !== undefined && g !== '')))
   return founds
 })
-// const attrOptions = ref<string[]>(["call_center_number", "phone_number"]);
 
-// watch(() => store.curProject, () => {
-  
-  
-// });
 
 </script>
 
