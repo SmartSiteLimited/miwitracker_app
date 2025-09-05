@@ -29,6 +29,34 @@ const props = defineProps<{
                 <span v-if="props.result === true" class="text-green-500">Success</span>
                 <span v-else-if="props.result === false" class="text-red-500">Cannot Locate</span>
             </template>
+            <template v-if="props.taskName === 'set_phonebook'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set Phone Book</span>
+            </template>
+            <template v-if="props.taskName === 'set_blockphone'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set Block Phone</span>
+            </template>
+            <template v-if="props.taskName === 'set_health'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set Health</span>
+            </template>
+            <template v-if="props.taskName === 'set_callcenter'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set Call Center</span>
+            </template>
+            <template v-if="props.taskName === 'set_sos'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set SOS</span>
+            </template>
+            <template v-if="props.taskName === 'power_off'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Failed to Power Off</span>
+            </template>
+            <template v-if="props.taskName === 'reboot'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Failed to Reboot</span>
+            </template>
         </span>
     </div>
 </template>

@@ -18,6 +18,14 @@ const appTitle = import.meta.env.VITE_APP_TITLE || 'Device Manager'
                 :class="{ 'text-green-500': $route.path === '/settings' }">
                 Settings
             </router-link>
+            <router-link to="/projects"  class="text-sm font-bold transition-colors hover:text-primary"
+                :class="{ 'text-green-500': $route.path === '/projects' }">
+                Project List
+            </router-link>
+            <router-link to="/groups"  class="text-sm font-bold transition-colors hover:text-primary"
+                :class="{ 'text-green-500': $route.path === '/groups' }">
+                Groups
+            </router-link>
         </nav>
     </div>
 </template>

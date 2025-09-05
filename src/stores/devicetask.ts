@@ -60,6 +60,27 @@ export const useDeviceTaskStore = (id: string) =>
                     if (taskName === 'locate') {
                         taskFns = await this.chunkTasks(MiwiBackend.locate, imeis, batchSize)
                     }
+                    if (taskName ==='set_phonebook') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setPhoneBook , imeis , batchSize)
+                    }
+                    if (taskName ==='set_blockphone') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setBlockPhone , imeis , batchSize)
+                    }
+                    if (taskName ==='set_sos') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setSOS , imeis , batchSize)
+                    }
+                    if (taskName ==='set_health') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setHealth , imeis , batchSize)
+                    }
+                    if (taskName ==='set_callcenter') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setCallCenter , imeis , batchSize)
+                    }
+                    if (taskName ==='reboot') {
+                        taskFns = await this.chunkTasks(MiwiBackend.Reboot , imeis , batchSize)
+                    }
+                    if (taskName ==='poweroff') {
+                        taskFns = await this.chunkTasks(MiwiBackend.PowerOff , imeis , batchSize)
+                    }
                     await runSequentially(taskFns)
 
                 } catch (error) {

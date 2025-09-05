@@ -35,5 +35,35 @@ export const routes = [
         component: () => import('@/views/Settings.vue')
       }
     ]
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'ProjectList',
+        metadata: {
+          title: 'Project List'
+        },
+        component: () => import('@/views/ProjectList.vue')
+      }
+    ]
+  }
+  ,{
+    path: '/groups',
+    name: 'Groups',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'GroupList',
+        metadata: {
+          title: 'Group List'
+        },
+        component: () => import('@/views/GroupList.vue')
+      }
+    ]
   }
 ];

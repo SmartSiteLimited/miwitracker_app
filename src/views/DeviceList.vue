@@ -3,6 +3,7 @@ import DeviceTaskMenu from '@/components/DeviceTaskMenu.vue'
 import DeviceTaskResult from '@/components/DeviceTaskResult.vue'
 import ImeisInput from '@/components/ImeisInput.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import Button from '@/widgets/ui/button/Button.vue'
 import type { IRequestResponse } from '@/composables/backend'
 import { type Device } from '@/composables/device'
 import { API_ENDPOINT } from '@/config'
@@ -33,9 +34,9 @@ const checkImeis = ref<Set<string>>(new Set())
 const filterImeis = ref<Set<string>>(new Set())
 const filterTaskImeis = ref<Map<string, string[]>>(new Map())
 const loading = ref(true)
-
+const fetchImeiList = ref<any[]>([])
 const keyword = ref('')
-
+const groupOption = ref<(string | null)[]>([])
 const displayImeis = computed(() => {
   let founds = devices.value
   if (filterImeis.value.size > 0) {
@@ -59,7 +60,7 @@ const displayImeis = computed(() => {
 })
 
 
-function fetchData() {
+async function fetchData() {
   loading.value = true
   let url = `${API_ENDPOINT}/devices/` + (store.curProject || '')
   let options: RequestInit = {}
@@ -133,6 +134,66 @@ function updateFilterResult(storeId: number, result: number) {
   }
 }
 
+async function updateImeibyProject(storeProject: string | null) {
+
+  if (storeProject) {
+    // 1 . Fetch IMEIs for the specific project by post method 
+
+    const modelUrl = `https://mqtt.monitor.com.hk:1882/updateImeis`
+
+    if (store.curProject !== null) {
+      await fetch(modelUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          project: storeProject,
+        })
+      }).then(res => res.json())
+        .then((res: IRequestResponse<string[]>) => {
+          if (res.success) {
+            // console.log("Fetched IMEIs:", res.data)
+            // get all the imeis list from the data.map key
+            const keys = Object.keys(res.data || {});
+            // append keys (deduplicated) to fetchImeiList
+            fetchImeiList.value = Array.from(new Set([...fetchImeiList.value, ...keys]));
+
+          }
+        }).then(async () => {
+          // after fetch, update userImeis and fetchData
+          await fetch(API_ENDPOINT + `/devices/save/${store.curProject}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              imeis: fetchImeiList.value,
+            })
+          }).then(res => res.json())
+          userImeis.value = new Set(fetchImeiList.value.map(String));
+          fetchData();
+        }).catch(err => {
+          console.error("Error fetching IMEIs:", err);
+        });
+    }
+  }
+}
+
+async function updateGroupId() {
+  await fetch(API_ENDPOINT + `/devices/addupdateGroupId/${store.curProject}` , {
+    method: "GET",
+  }).then(res => res.json())
+    .then((res: IRequestResponse<string[]>) => {
+      if (res.success) {
+        // console.log("Updated Group IDs for IMEIs:", res.data)
+        fetchData()
+      }
+    }).catch(err => {
+      console.error("Error updating Group IDs:", err);
+    });
+}
+
 watch(keyword, () => {
   checkImeis.value.clear()
 })
@@ -143,6 +204,7 @@ watch(() => store.curProject, () => {
   filterTaskImeis.value.clear()
   keyword.value = ''
   devices.value = []
+  // console.log(store.curProject)
   fetchData()
 })
 
@@ -150,29 +212,25 @@ watch(() => displayImeis.value, () => {
   checkImeis.value.clear()
 })
 
-onMounted(() => {
-  fetchData()
+onMounted(async () => {
+  await fetchData()
+
 })
 </script>
 
 <template>
   <div>
     <div>
-      <div class="flex justify-between mb-2">
-        <div class="w-1/2 flex items-center gap-2">
-          <div>
-            <Badge v-if="checkImeis.size > 0" class="bg-blue-500 text-white">{{ checkImeis.size }} selected</Badge>
-          </div>
-        </div>
-
-        <div class="w-1/2 flex justify-end gap-2">
-          <ImeisInput v-if="store.curProject === null"
-            :model-value="Array.from(userImeis)" @update:model-value="userImeis = new Set($event); fetchData()" />
-          <ImeisInput v-else
-            :model-value="Array.from(filterImeis)" @update:model-value="filterImeis = new Set($event);"
-            text="Filter by IMEIs" @clear="filterImeis = new Set()" />
-
+      <div class="flex justify-end mb-2">
+        <div class="w-full flex justify-start gap-2">
           <SearchBox class="w-[300px]" v-model="keyword" @clear="keyword = ''" />
+          <ImeisInput v-if="store.curProject === null" :model-value="Array.from(userImeis)"
+            @update:model-value="userImeis = new Set($event); fetchData()" />
+          <ImeisInput v-else :model-value="Array.from(filterImeis)" @update:model-value="filterImeis = new Set($event);"
+            text="Filter by IMEIs" @clear="filterImeis = new Set()" />
+          <Button v-if="store.curProject !== null" class="bg-blue-500 text-white" @click="updateGroupId()">Update Device Info</Button>
+          <Button v-if="store.curProject !== null" @click="updateImeibyProject(store.curProject)">Fetch New Devices</Button>
+
         </div>
       </div>
 

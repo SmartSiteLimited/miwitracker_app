@@ -1,6 +1,5 @@
 import type { IRequestResponse } from "@/composables/backend"
 import { API_ENDPOINT } from "@/config"
-import { ref } from "process"
 
 export class MiwiBackend {
 
@@ -38,6 +37,160 @@ export class MiwiBackend {
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to locate ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async setPhoneBook(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/setphonebook/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to set phone book for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async setBlockPhone(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/setblockphone/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to set block phone for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async setHealth(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/sethealth/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to set health for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async setSOS(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/setsos/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to set SOS for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async setCallCenter(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/setcallcenter/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to set Call Center for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async Reboot(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/reboot/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to reboot device ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
+    public static async PowerOff(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/poweroff/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to power off device ${imei}:`, error)
             })
         )
 
