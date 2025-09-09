@@ -35,31 +35,31 @@ const fetchProjectList = async () => {
   }
 };
 
-const addGroup = async () => {
-  if (!store.curProject) {
-    alert("No project selected");
-    return;
-  }
-  // const newGroupId = prompt("Enter new Group Name:");
-  // if (newGroupId && newGroupId.trim() !== "") {
-  //   const payload = {
-  //     GroupName: newGroupId.trim(),
-  //   };
-    const response = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + store.curProject, {
-      method: 'GET',
-    });
-    const result = await response.json();
-    if (result.success) {
-      // alert("Group added successfully");
-      fetchProjectList();
-    } else {
-      // alert("Failed to add group: " + (result.message || "Unknown error"));
-    }
-  }
+// const addGroup = async () => {
+//   if (!store.curProject) {
+//     alert("No project selected");
+//     return;
+//   }
+//   // const newGroupId = prompt("Enter new Group Name:");
+//   // if (newGroupId && newGroupId.trim() !== "") {
+//   //   const payload = {
+//   //     GroupName: newGroupId.trim(),
+//   //   };
+//     const response = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + store.curProject, {
+//       method: 'GET',
+//     });
+//     const result = await response.json();
+//     if (result.success) {
+//       // alert("Group added successfully");
+//       fetchProjectList();
+//     } else {
+//       // alert("Failed to add group: " + (result.message || "Unknown error"));
+//     }
+//   }
 
 
 onMounted(async () => {
- await fetchProjectList()
+ await fetchProjectList();
   console.log("Projects fetched successfully" , projectList.value ) ;
   
 });
@@ -75,15 +75,12 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h1>Setting Panel</h1>
     <div class="flex justify-between mb-2">
         <div class="w-full flex justify-end gap-2">
-      <Button class="bg-blue-500" @click="addGroup()">Add Group</Button>
+      <!-- <Button class="bg-blue-500 text-sm" @click="addGroup()">Add Group</Button> -->
       </div>
     </div>
-    <ProjectList :modelValue="projectList" 
-    @save="fetchProjectList"
-    />
+    <ProjectList :modelValue="projectList" @save="fetchProjectList" @delete="fetchProjectList" />
   </div>
 </template>
     

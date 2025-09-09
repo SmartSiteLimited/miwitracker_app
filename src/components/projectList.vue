@@ -2,8 +2,10 @@
 import { Badge } from '@/widgets/ui/badge'
 import { API_ENDPOINT } from "@/config"
 import { useAppStore } from '@/stores/app'
+import Icon from '@/components/Icon.vue'
 export default {
   name: "ProjectList",
+  components: { Icon, Badge },
   props: {
     modelValue: {
       type: Array,
@@ -15,31 +17,10 @@ export default {
       type: String,
       default: 'No Project Found',
     },
-
-    // keyLabel: {
-    //   type: String,
-    //   default: 'Key',
-    // },
-    // valueLabel: {
-    //   type: String,
-    //   default: 'Value',
-    // },
-    // actionLabel: {
-    //   type: String,
-    //   default: 'Actions',
-    // },
-    // keyPlaceholder: {
-    //   type: String,
-    //   default: 'Enter key',
-    // },
-    // valuePlaceholder: {
-    //   type: String,
-    //   default: 'Enter value',
-    // },
-    // addButtonText: {
-    //   type: String,
-    //   default: 'Add',
-    // },
+    addButtonText: {
+      type: String,
+      default: 'Add',
+    },
   },
 
 
@@ -60,45 +41,74 @@ export default {
   },
 
   methods: {
-    // addRow() {
-    //   // this.entries.push({ key: '', value: '' });
-    //   this.emitUpdate();
-    // },
+    addRow() {
+      this.entries.push({ id: '', name: '', url: '', miwi_group_id: '' });
+      this.emitUpdate();
+    },
 
-    // deleteRow(index) {
-    //   this.entries.splice(index, 1);
-    //   this.emitUpdate();
-    // },
+    deleteItem(project_name) {
+      // if (!this.store.curProject) {
+      //   alert("No project selected");
+      //   return;
+      // }
+      confirm("Are you sure to delete this project?");
 
-    // updateKey(index, value) {
-    //   this.entries[index].value = value.trim().replace(/\s*,\s*/g, ',');
-    //   this.emitUpdate();
-    // },
-
-    // updateValue(index, value) {
-    //   this.entries[index].value = value;
-    //   this.emitUpdate();
-    // },
-
-    // emitUpdate() {
-    //   this.$emit('update:modelValue', JSON.parse(JSON.stringify(this.entries)));
-    // },
-    // emitSave() {
-    //   this.$emit('save');
-    // },  
-
-    async saveConfig() {
-      // call the backend api to save the entries value 
-      if (!this.store.curProject) {
-        alert("No project selected");
-        return;
+      fetch(API_ENDPOINT + '/projects/' + project_name, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(resp => {
+        if (resp.ok) {
+          // Handle successful response
+          console.log(resp.data);
+          this.$emit('delete');
+        } else {
+          // Handle error response
+          console.log("Failed to delete project");
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+      });
+    },
+    async addGroup(project_name) {
+    if (!store.curProject) {
+      alert("No project selected");
+      return;
+    }
+    // const newGroupId = prompt("Enter new Group Name:");
+    // if (newGroupId && newGroupId.trim() !== "") {
+    //   const payload = {
+    //     GroupName: newGroupId.trim(),
+    //   };
+      const response = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + project_name, {
+        method: 'GET',
+      });
+      const result = await response.json();
+      if (result.success) {
+        // alert("Group added successfully");
+        this.$emit('save');
+      } else {
+        // alert("Failed to add group: " + (result.message || "Unknown error"));
       }
+    },
+
+    updateValue(index, value, field) {
+      this.entries[index][field] = value.trim().replace(/\s*,\s*/g, ',');
+      this.emitUpdate();
+    },
+
+    emitUpdate() {
+      this.$emit('update:modelValue', JSON.parse(JSON.stringify(this.entries)));
+    },
+
+    async saveProject() {
+      // call the backend api to save the entries value 
       console.log(this.entries);
       const payload = {
-        attributes : this.entries, 
-        project : this.store.curProject
+        projects : this.entries, 
       }
-      const response = await fetch(API_ENDPOINT + '/settings/saveConfig', {
+      const response = await fetch(API_ENDPOINT + '/projects/saveProjects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +119,7 @@ export default {
       if (response.ok) {
         // Handle successful response
         console.log("Attributes saved successfully");
-        this.emitSave();
+        this.$emit('save');
       } else {
         // Handle error response
       }
@@ -118,17 +128,11 @@ export default {
 };
 </script>
 
-<style scoped>
-.settings-attribute-input {
-  @apply max-w-full;
-}
-</style>
 
 <template>
-  <div class="settings-attribute-input">
+  <div >
     <div class="relative overflow-x-auto">
-
-      
+      <Icon name="Plus" class="border-blue-500 text-blue-500 w-10 h-10" @click="addRow" />      
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
           <tr>
@@ -136,6 +140,7 @@ export default {
             <th class="px-2 py-1">Project Name </th>
             <th class="px-2 py-1">URL</th>
             <th class="px-2 py-1">Group ID</th>
+            <th class="px-2 py-1">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -143,38 +148,46 @@ export default {
             <td class="px-2 py-1">
               <input type="text"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                :value="entry.id" disabled />
+                :value="entry.id" disabled/>
             </td>
             <td class="px-2 py-1">
               <input type="text"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                :value="entry.name" disabled/>
+                :value="entry.name" @change="updateValue(index , $event.target.value , 'name')" />
             </td>
             <td class="px-2 py-1">
               <input type="text"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                :value="entry.url" disabled/>
+                :value="entry.url" @change="updateValue(index , $event.target.value , 'url')" />
             </td>
             <td class="px-2 py-1">
               <input type="text"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 :value="entry.miwi_group_id" disabled/>
+                
+            </td>
+            <td class="px-2 py-1">
+              <Badge v-if="entry.id && entry.miwi_group_id == null " variant="destructive" class="cursor-pointer w-8 h-8 bg-blue-500 ml-2" @click="addGroup(entry.name)">
+                <Icon name="Plus" class="w-8 h-8" />
+              </Badge>
+              <Badge variant="destructive" class="cursor-pointer w-8 h-8 ml-2" @click="deleteItem(entry.name)">
+                <Icon name="Trash" class="w-8 h-8" />
+              </Badge>
             </td>
           </tr>
           <tr v-if="entries.length === 0">
             <td class="px-2 py-4 text-center" colspan="3">{{ emptyMessage }}</td>
           </tr>
+          
         </tbody>
       </table>
-      <!--<div class="p-2 justify-between flex">
-         <button type="button" class="border-blue-500 text-blue-500" @click="addRow">
-          <i class="fal fa-plus"></i> {{ addButtonText }}
-        </button> 
-        <button type="button" class="border-blue-500 text-blue-500" @click="saveConfig">
-          <i class="fal fa-save"></i> Save Changes
-        </button> 
-      </div> -->      
+      <div class="p-2 justify-item flex">
+         
+         <div class="flex items-center gap-1 cursor-pointer" @click="saveProject">
+           <Icon name="Save" class="border-blue-500 text-blue-500 w-6 h-6"  />
+           <span>Save</span>
+         </div>
+      </div>
     </div>
   </div>
 </template>
-
