@@ -72,15 +72,7 @@ export default {
       });
     },
     async addGroup(project_name) {
-    if (!store.curProject) {
-      alert("No project selected");
-      return;
-    }
-    // const newGroupId = prompt("Enter new Group Name:");
-    // if (newGroupId && newGroupId.trim() !== "") {
-    //   const payload = {
-    //     GroupName: newGroupId.trim(),
-    //   };
+
       const response = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + project_name, {
         method: 'GET',
       });
