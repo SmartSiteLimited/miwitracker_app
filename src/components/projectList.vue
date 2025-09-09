@@ -3,6 +3,7 @@ import { Badge } from '@/widgets/ui/badge'
 import { API_ENDPOINT } from "@/config"
 import { useAppStore } from '@/stores/app'
 import Icon from '@/components/Icon.vue'
+import { useToast } from 'vue-toastification';
 export default {
   name: "ProjectList",
   components: { Icon, Badge },
@@ -27,7 +28,8 @@ export default {
   data() {
     return {
       entries: JSON.parse(JSON.stringify(this.modelValue || [])),
-      store: useAppStore()
+      store: useAppStore(),
+      toast: useToast()
     };
   },
 
@@ -63,6 +65,7 @@ export default {
           // Handle successful response
           console.log(resp.data);
           this.$emit('delete');
+          this.toast.success("Project deleted successfully");
         } else {
           // Handle error response
           console.log("Failed to delete project");
@@ -80,6 +83,7 @@ export default {
       if (result.success) {
         // alert("Group added successfully");
         this.$emit('save');
+        this.toast.success("Group added successfully");
       } else {
         // alert("Failed to add group: " + (result.message || "Unknown error"));
       }
@@ -112,6 +116,7 @@ export default {
         // Handle successful response
         console.log("Attributes saved successfully");
         this.$emit('save');
+        this.toast.success("Projects saved successfully");
       } else {
         // Handle error response
       }
@@ -128,7 +133,7 @@ export default {
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
           <tr>
-            <th class="px-2 py-1">Project ID </th>
+            <th hidden class="px-2 py-1">Project ID </th>
             <th class="px-2 py-1">Project Name </th>
             <th class="px-2 py-1">URL</th>
             <th class="px-2 py-1">Group ID</th>
@@ -137,8 +142,8 @@ export default {
         </thead>
         <tbody>
           <tr v-for="(entry, index) in entries" :key="`${index}-${entry.key || ''}`">
-            <td class="px-2 py-1">
-              <input type="text"
+            <td class="px-2 py-1" hidden>
+              <input type="text" 
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 :value="entry.id" disabled/>
             </td>
@@ -159,7 +164,7 @@ export default {
                 
             </td>
             <td class="px-2 py-1">
-              <Badge v-if="entry.id && entry.miwi_group_id == null " variant="destructive" class="cursor-pointer w-8 h-8 bg-blue-500 ml-2" @click="addGroup(entry.name)">
+              <Badge v-if="entry.id && entry.miwi_group_id == null" variant="destructive" class="cursor-pointer w-8 h-8 bg-blue-500 ml-2" @click="addGroup(entry.name)">
                 <Icon name="Plus" class="w-8 h-8" />
               </Badge>
               <Badge variant="destructive" class="cursor-pointer w-8 h-8 ml-2" @click="deleteItem(entry.name)">

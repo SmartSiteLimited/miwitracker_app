@@ -3,6 +3,7 @@ import { Badge } from '@/widgets/ui/badge'
 import Icon from '@/components/Icon.vue'
 import { API_ENDPOINT } from "@/config"
 import { useAppStore } from '@/stores/app'
+import { useToast } from 'vue-toastification';
 export default {
   name: "GroupForm",
   components: { Icon, Badge },
@@ -27,7 +28,8 @@ export default {
   data() {
     return {
       entries: JSON.parse(JSON.stringify(this.modelValue || [])),
-      store: useAppStore()
+      store: useAppStore(),
+      toast: useToast()
     };
   },
 
@@ -46,10 +48,10 @@ export default {
       this.emitUpdate();
     },
 
-    deleteItem(id) {
+    deleteItem(id , project) {
       confirm("Are you sure to delete this group?");
 
-      fetch(API_ENDPOINT + '/devices/deletegroups/' + id, {
+      fetch(API_ENDPOINT + '/devices/deletegroups/' + id + '/' + project, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -59,6 +61,7 @@ export default {
           // Handle successful response
           console.log(resp.data);
           this.$emit('delete');
+          this.toast.success("Group deleted successfully");
         } else {
           // Handle error response
           console.log("Failed to delete group");
@@ -68,38 +71,6 @@ export default {
         console.log("Error occurred while deleting group");
       });
     },
-
-    // updateValue(index, value, field) {
-    //   this.entries[index][field] = value.trim().replace(/\s*,\s*/g, ',');
-    //   this.emitUpdate();
-    // },
-
-    // emitUpdate() {
-    //   this.$emit('update:modelValue', JSON.parse(JSON.stringify(this.entries)));
-    // },
-
-    // async saveProject() {
-    //   // call the backend api to save the entries value 
-    //   console.log(this.entries);
-    //   const payload = {
-    //     projects : this.entries, 
-    //   }
-    //   const response = await fetch(API_ENDPOINT + '/projects/saveProjects', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(payload),
-    //   });
-
-    //   if (response.ok) {
-    //     // Handle successful response
-    //     console.log("Attributes saved successfully");
-    //     this.$emit('save');
-    //   } else {
-    //     // Handle error response
-    //   }
-    // }
   },
 };
 </script>
@@ -155,7 +126,7 @@ export default {
                 :value="entry.Created" disabled/>
             </td>
             <td class="px-2 py-1">
-              <Badge class="bg-red-500 p-2 text-white rounded-md" color="text-white w-8 h-8" @click="deleteItem(entry.GroupId)">
+              <Badge class="bg-red-500 p-2 text-white rounded-md" color="text-white w-8 h-8" @click="deleteItem(entry.GroupId , entry.GroupName)">
                 <Icon name="Trash" class="w-8 h-8" />
               </Badge>
             </td>
