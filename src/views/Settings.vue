@@ -14,7 +14,10 @@ const entries = ref<{ key: string; value: string }[]>([]);
 
 const store = useAppStore();
 
-const attrOptions = ref<string[]>(["call_center_number", "phone_number"]);
+const attrOptions = ref<Record<string, string>>({
+  "sos_phone_number": "SOS Phone Number",
+  "call_center_number": "Call Center Number",
+})
 
 function addRow() {
   entries.value.push({ key: '', value: '' })
@@ -22,14 +25,6 @@ function addRow() {
 
 function deleteRow(index: number) {
   entries.value.splice(index, 1)
-}
-
-function updateKey(index: number, value: string) {
-  entries.value[index].key = value.trim().replace(/\s*,\s*/g, ',')
-}
-
-function updateValue(index: number, value: string) {
-  entries.value[index].value = value
 }
 
 const fetchSettings = async () => {
@@ -72,7 +67,7 @@ async function saveConfig() {
     })
 
     const response = await res.json()
-    if (response.success && response.data) {
+    if (response.success) {
       toast.success('Settings saved successfully')
     } else {
       toast.error('Error saving settings: ' + (response.message || 'Unknown error'))
@@ -116,14 +111,13 @@ onMounted(() => {
         <TableBody>
           <TableRow v-for="(entry, index) in entries" :key="`row-${index}`">
             <TableCell class="px-2 py-1">
-              <Select v-if="attrOptions && attrOptions.length > 0" @change="updateKey(index, $event)"
-                :model-value="entry.key">
+              <Select v-if="attrOptions && Object.keys(attrOptions).length > 0" v-model="entry.key">
                 <SelectTrigger class="w-full">
                   <SelectValue placeholder="- Setting -" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem v-for="option in attrOptions" :key="option" :value="option">{{ option }}
+                    <SelectItem v-for="(label, value) in attrOptions" :key="value" :value="value">{{ label }}
                     </SelectItem>
                   </SelectGroup>
                 </SelectContent>

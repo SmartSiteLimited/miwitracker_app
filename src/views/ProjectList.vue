@@ -105,11 +105,11 @@ onMounted(() => {
       <Table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <TableHeader class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <TableRow>
-            <TableHead class="px-2 py-1">#</TableHead>
+            <TableHead class="px-2 py-1 w-[80px]">#</TableHead>
             <TableHead class="px-2 py-1">Project Name </TableHead>
             <TableHead class="px-2 py-1">URL</TableHead>
-            <TableHead class="px-2 py-1">Group ID</TableHead>
-            <TableHead class="px-2 py-1">Action</TableHead>
+            <TableHead class="px-2 py-1 w-[150px]">Group ID</TableHead>
+            <TableHead class="px-2 py-1 w-[100px]">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -126,6 +126,7 @@ onMounted(() => {
             <td class="px-2 py-1">
               {{ entry.miwi_group_id }}
               <Button type="button" v-if="entry.id && entry.miwi_group_id == null" variant="outline"
+                class="border-blue-400 text-blue-400"
                 @click="addGroup(entry.name)">
                 Create Group
               </Button>
