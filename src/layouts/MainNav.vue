@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ProjectSelector from '@/components/ProjectSelector.vue';
-import { cn } from '@/lib/utils'
-import { Button } from '@/widgets/ui/button';
+import { cn } from '@/lib/utils';
 
 const appTitle = import.meta.env.VITE_APP_TITLE || 'Device Manager'
 </script>
@@ -20,7 +19,7 @@ const appTitle = import.meta.env.VITE_APP_TITLE || 'Device Manager'
             </router-link>
             <router-link to="/projects"  class="text-sm font-bold transition-colors hover:text-primary"
                 :class="{ 'text-green-500': $route.path === '/projects' }">
-                Project List
+                Projects
             </router-link>
             <router-link to="/groups"  class="text-sm font-bold transition-colors hover:text-primary"
                 :class="{ 'text-green-500': $route.path === '/groups' }">

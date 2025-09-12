@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import DeviceTaskMenu from '@/components/DeviceTaskMenu.vue'
 import DeviceTaskResult from '@/components/DeviceTaskResult.vue'
+import Icon from '@/components/Icon.vue'
 import ImeisInput from '@/components/ImeisInput.vue'
 import SearchBox from '@/components/SearchBox.vue'
-import Button from '@/widgets/ui/button/Button.vue'
+import TaskButton from '@/components/TaskButton.vue'
+import { Separator } from '@/widgets/ui/separator'
 import type { IRequestResponse } from '@/composables/backend'
 import { type Device } from '@/composables/device'
-import { API_ENDPOINT } from '@/config'
+import { API_ENDPOINT, API_IMEIS_ENDPOINT } from '@/config'
 import { useAppStore } from '@/stores/app'
 import { useDeviceTaskStore } from '@/stores/devicetask'
-import { Badge } from '@/widgets/ui/badge'
 import { Checkbox } from '@/widgets/ui/checkbox'
 import { Skeleton } from '@/widgets/ui/skeleton'
 import {
@@ -33,10 +34,9 @@ const userImeis = ref<Set<string>>(new Set())
 const checkImeis = ref<Set<string>>(new Set())
 const filterImeis = ref<Set<string>>(new Set())
 const filterTaskImeis = ref<Map<string, string[]>>(new Map())
-const loading = ref(true)
+const loading = ref(false)
 const fetchImeiList = ref<any[]>([])
 const keyword = ref('')
-const groupOption = ref<(string | null)[]>([])
 const displayImeis = computed(() => {
   let founds = devices.value
   if (filterImeis.value.size > 0) {
@@ -134,64 +134,74 @@ function updateFilterResult(storeId: number, result: number) {
   }
 }
 
-async function updateImeibyProject(storeProject: string | null) {
+async function updateImeibyProject(storeProject: string | null, signal?: AbortSignal) {
+  if (storeProject === null) return;
 
-  if (storeProject) {
-    // 1 . Fetch IMEIs for the specific project by post method 
+  try {
+    const resp = await fetch(API_IMEIS_ENDPOINT, {
+      method: "POST",
+      signal,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        project: storeProject,
+      })
+    })
 
-    const modelUrl = `https://mqtt.monitor.com.hk:1882/updateImeis`
+    const response = await resp.json();
+    if (response.success) {
+      const keys = Object.keys(response.data || {});
+      fetchImeiList.value = Array.from(new Set([...fetchImeiList.value, ...keys]));
 
-    if (store.curProject !== null) {
-      await fetch(modelUrl, {
+      // after fetch, update userImeis and fetchData
+      await fetch(API_ENDPOINT + `/devices/save/${storeProject}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
+        signal,
         body: JSON.stringify({
-          project: storeProject,
+          imeis: fetchImeiList.value,
         })
-      }).then(res => res.json())
-        .then((res: IRequestResponse<string[]>) => {
-          if (res.success) {
-            // console.log("Fetched IMEIs:", res.data)
-            // get all the imeis list from the data.map key
-            const keys = Object.keys(res.data || {});
-            // append keys (deduplicated) to fetchImeiList
-            fetchImeiList.value = Array.from(new Set([...fetchImeiList.value, ...keys]));
+      })
 
-          }
-        }).then(async () => {
-          // after fetch, update userImeis and fetchData
-          await fetch(API_ENDPOINT + `/devices/save/${store.curProject}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              imeis: fetchImeiList.value,
-            })
-          }).then(res => res.json())
-          userImeis.value = new Set(fetchImeiList.value.map(String));
-          fetchData();
-        }).catch(err => {
-          console.error("Error fetching IMEIs:", err);
-        });
+      userImeis.value = new Set(fetchImeiList.value.map(String));
+
+      fetchData();
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log('Request was cancelled')
+    } else {
+      console.error("Error fetching IMEIs:", error);
     }
   }
 }
 
-async function updateGroupId() {
-  await fetch(API_ENDPOINT + `/devices/addupdateGroupId/${store.curProject}` , {
-    method: "GET",
-  }).then(res => res.json())
-    .then((res: IRequestResponse<string[]>) => {
-      if (res.success) {
-        // console.log("Updated Group IDs for IMEIs:", res.data)
-        fetchData()
+async function updateGroupId(storeProject: string | null, signal?: AbortSignal) {
+  if (storeProject === null) return;
+
+  try {
+    const res = await fetch(API_ENDPOINT + `/devices/addupdateGroupId/${storeProject}`, {
+      method: "GET",
+      signal,
+      headers: {
+        "Content-Type": "application/json"
       }
-    }).catch(err => {
-      console.error("Error updating Group IDs:", err);
-    });
+    })
+
+    const response = await res.json();
+    if (response.success) {
+      fetchData();
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log('Request was cancelled')
+    } else {
+      console.error("Error updating Group IDs:", error);
+    }
+  }
 }
 
 watch(keyword, () => {
@@ -228,9 +238,20 @@ onMounted(async () => {
             @update:model-value="userImeis = new Set($event); fetchData()" />
           <ImeisInput v-else :model-value="Array.from(filterImeis)" @update:model-value="filterImeis = new Set($event);"
             text="Filter by IMEIs" @clear="filterImeis = new Set()" />
-          <Button v-if="store.curProject !== null" class="bg-blue-500 text-white" @click="updateGroupId()">Update Device Info</Button>
-          <Button v-if="store.curProject !== null" @click="updateImeibyProject(store.curProject)">Fetch New Devices</Button>
 
+          <div class="flex-grow"></div>
+
+          <TaskButton v-if="store.curProject !== null" variant="outline"
+            :promise-func="(signal) => updateGroupId(store.curProject, signal)">
+            <Icon name="CardSim" />
+            Update ICCID / Group
+          </TaskButton>
+
+          <TaskButton v-if="store.curProject !== null" variant="outline"
+            :promise-func="(signal) => updateImeibyProject(store.curProject, signal)">
+            <Icon name="CloudDownload" />
+            Fetch New Devices
+          </TaskButton>
         </div>
       </div>
 
@@ -268,6 +289,9 @@ onMounted(async () => {
                 <DeviceTaskMenu :check-imeis="checkImeis" @execute="executeTask(2, $event)"
                   @update:filter-result="updateFilterResult(2, $event)" />
               </TableHead>
+              <TableHead class="w-[100px] border-t border-r border-b-2">
+                Group ID
+              </TableHead>
               <TableHead class="w-[160px] border-t border-r border-b-2">
                 Updated
               </TableHead>
@@ -298,10 +322,20 @@ onMounted(async () => {
                 :status="taskStores[2].status.get(item.imei)" :result="taskStores[2].result.get(item.imei)" />
             </TableCell>
             <TableCell class="border-r">
+              {{ item.miwi_group_id }}
+            </TableCell>
+            <TableCell class="border-r">
               {{ item.updated }}
             </TableCell>
           </TableRow>
         </table>
+
+        <div v-if="store.curProject === null && devices.length === 0" class="p-4 flex flex-col space-y-3 text-center max-w-md mx-auto">
+          <span>Select a project first</span>
+           <span class="text-gray-700 dark:text-gray-400">or</span>
+          <ImeisInput v-if="store.curProject === null" :model-value="Array.from(userImeis)"
+            @update:model-value="userImeis = new Set($event); fetchData()" />
+        </div>
       </div>
     </div>
   </div>

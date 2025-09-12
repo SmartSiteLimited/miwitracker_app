@@ -1,87 +1,157 @@
-<script setup lang="ts">
-import {ref , watch , onMounted} from 'vue'
-import ProjectList from '@/components/projectList.vue'
-import { useAppStore } from '@/stores/app'
-import { API_ENDPOINT } from '@/config';
-import  { Button } from '@/widgets/ui/button'
-const projectList = ref<{ key: string; value: any }[]>([]);
+<script lang="ts" setup>
+import Icon from '@/components/Icon.vue'
+import type { Project } from '@/composables/project'
+import { API_ENDPOINT } from '@/config'
+import { Button } from '@/widgets/ui/button'
+import { Input } from '@/widgets/ui/input'
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/widgets/ui/table'
+import { onMounted, ref } from 'vue'
+import { toast } from 'vue-sonner'
 
-const store = useAppStore();
 
-const fetchProjectList = async () => {
+const entries = ref<Project[]>([])
+
+async function fetchProjectList() {
   try {
-    // if (!store.curProject) {
-    //   return;
-    // }
     const response = await fetch(API_ENDPOINT + `/projects/`);
     const data = await response.json();
-    console.log("Fetched projects:", data);
-    // if (data.data && Array.isArray(data.data)) {
-    //   projectList.value = (data.data as any[]).map(p => ({
-    //     key: String(p.id ?? p.name ?? ''),
-    //     value: p
-    //   }));
-    //   return;
-    // }
 
-    // console.log("Fetched settings:", data);
-    if (data.data) {
-      projectList.value = data.data; 
-    } else {
-      projectList.value = [];
-    }
+    entries.value = data.data || []
   } catch (error) {
     console.error("Error fetching settings:", error);
   }
 };
 
-// const addGroup = async () => {
-//   if (!store.curProject) {
-//     alert("No project selected");
-//     return;
-//   }
-//   // const newGroupId = prompt("Enter new Group Name:");
-//   // if (newGroupId && newGroupId.trim() !== "") {
-//   //   const payload = {
-//   //     GroupName: newGroupId.trim(),
-//   //   };
-//     const response = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + store.curProject, {
-//       method: 'GET',
-//     });
-//     const result = await response.json();
-//     if (result.success) {
-//       // alert("Group added successfully");
-//       fetchProjectList();
-//     } else {
-//       // alert("Failed to add group: " + (result.message || "Unknown error"));
-//     }
-//   }
+function addRow() {
+  entries.value.push({ id: 0, name: '', url: '', miwi_group_id: 0 } as Project)
+}
 
+async function saveProject() {
+  const payload = { projects: entries.value }
+  try {
+    const response = await fetch(API_ENDPOINT + '/projects/saveProjects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (response.ok) {
+      toast.success('Projects saved successfully')
+    } else {
+      console.error('Failed to save projects')
+    }
+  } catch (error) {
+    console.error('Error:', error)
+  }
+}
 
-onMounted(async () => {
- await fetchProjectList();
-  console.log("Projects fetched successfully" , projectList.value ) ;
-  
+async function deleteItem(project: Project) {
+  if (project.id === 0) {
+    entries.value = entries.value.filter(p => p !== project)
+    return
+  }
+
+  if (!confirm('Are you sure to delete this project?')) return
+
+  try {
+    const res = await fetch(API_ENDPOINT + '/projects/' + project.name, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    const response = await res.json()
+    if (response?.success) {
+      toast.success('Project deleted successfully')
+    } else {
+      toast.error('Failed to delete project: ' + (response?.message || 'Unknown error'))
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    toast.error('Error deleting project: ' + error)
+  }
+}
+
+async function addGroup(project: string) {
+  try {
+    const res = await fetch(API_ENDPOINT + '/devices/addMiwiGroup/' + project)
+    const response = await res.json()
+    if (response?.success) {
+      toast.success('Group added successfully')
+    } else {
+      toast.error('Failed to add group: ' + (response?.message || 'Unknown error'))
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    toast.error('Error adding group: ' + error)
+  }
+}
+
+onMounted(() => {
+  fetchProjectList();
 });
-
-// watch(() => store.curProject, () => {
-//   fetchProjectList().then(() => {
-//     console.log("Projects fetched successfully" , projectList.value ) ;
-//   });
-  
-// });
-
 </script>
 
 <template>
   <div>
-    <div class="flex justify-between mb-2">
-        <div class="w-full flex justify-end gap-2">
-      <!-- <Button class="bg-blue-500 text-sm" @click="addGroup()">Add Group</Button> -->
-      </div>
+    <div class="justify-between flex mb-2">
+      <Button type="button" variant="outline" @click="addRow">
+        <Icon name="Plus" /> Add
+      </Button>
+      <Button type="button" variant="outline" @click="saveProject">
+        <Icon name="Save" /> Save
+      </Button>
     </div>
-    <ProjectList :modelValue="projectList" @save="fetchProjectList" @delete="fetchProjectList" />
+
+    <div class="relative overflow-x-auto">
+      <Table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <TableHeader class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <TableRow>
+            <TableHead class="px-2 py-1">#</TableHead>
+            <TableHead class="px-2 py-1">Project Name </TableHead>
+            <TableHead class="px-2 py-1">URL</TableHead>
+            <TableHead class="px-2 py-1">Group ID</TableHead>
+            <TableHead class="px-2 py-1">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="(entry, index) in entries" :key="`row-${index}`">
+            <td class="px-2 py-1">
+              {{ entry.id }}
+            </td>
+            <td class="px-2 py-1">
+              <Input type="text" v-model="entry.name" />
+            </td>
+            <td class="px-2 py-1">
+              <Input type="text" v-model="entry.url" />
+            </td>
+            <td class="px-2 py-1">
+              {{ entry.miwi_group_id }}
+              <Button type="button" v-if="entry.id && entry.miwi_group_id == null" variant="outline"
+                @click="addGroup(entry.name)">
+                Create Group
+              </Button>
+            </td>
+            <td class="px-2 py-1">
+              <Button type="button" variant="ghost" class="text-red-500" @click="deleteItem(entry)">
+                <Icon name="Trash" :size="16" />
+              </Button>
+            </td>
+          </TableRow>
+          <TableRow v-if="entries.length === 0">
+            <td class="px-2 py-4 text-center" colspan="3">No Projects</td>
+          </TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell colspan="4" />
+            <TableCell>
+              <Button type="button" variant="outline" @click="addRow">
+                <Icon name="Plus" /> Add
+              </Button>
+            </TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>
+
+    </div>
   </div>
 </template>
-    
-  

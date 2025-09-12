@@ -8,10 +8,6 @@ const store = useAppStore();
 </script>
 
 <template>
-  <div class="md:hidden">
-
-  </div>
-
   <div class="hidden flex-col md:flex">
     <div class="border-b">
       <div class="flex h-16 items-center px-8">

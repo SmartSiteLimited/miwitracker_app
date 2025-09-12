@@ -19,8 +19,8 @@ const router = createRouter({
     strict: true,
 });
 
-router.afterEach((to, from) => {
-    const title = to.meta?.title;
+router.afterEach((to) => {
+    const title = to.meta?.title || 'MiwiTracker';
     useTitle(`${title} - ${APP_TITLE}`);
 });
 

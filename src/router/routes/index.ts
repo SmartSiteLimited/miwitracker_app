@@ -1,5 +1,4 @@
 import DefaultLayout from "@/layouts/Default.vue";
-import { metadata } from "@vueuse/core/metadata.mjs";
 
 export const routes = [
   {
@@ -14,7 +13,7 @@ export const routes = [
       {
         path: '',
         name: 'DeviceList',
-        metadata: {
+        meta: {
           title: 'Device List'
         },
         component: () => import('@/views/DeviceList.vue')
@@ -29,7 +28,7 @@ export const routes = [
       {
         path: '',
         name: 'SettingPanel',
-        metadata: {
+        meta: {
           title: 'Settings'
         },
         component: () => import('@/views/Settings.vue')
@@ -44,7 +43,7 @@ export const routes = [
       {
         path: '',
         name: 'ProjectList',
-        metadata: {
+        meta: {
           title: 'Project List'
         },
         component: () => import('@/views/ProjectList.vue')
@@ -59,7 +58,7 @@ export const routes = [
       {
         path: '',
         name: 'GroupList',
-        metadata: {
+        meta: {
           title: 'Group List'
         },
         component: () => import('@/views/GroupList.vue')

@@ -1,67 +1,79 @@
-<script setup lang="ts">
-import Icon from '@/components/Icon.vue'
+<script lang="ts" setup>
 import { API_ENDPOINT } from '@/config'
 import { useAppStore } from '@/stores/app'
 import { Button } from '@/widgets/ui/button'
-import { Input } from '@/widgets/ui/input'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/widgets/ui/select'
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/widgets/ui/table'
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
+import Icon from './Icon.vue'
 import { toast } from 'vue-sonner'
+import { Select, SelectLabel, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/widgets/ui/select'
+import { Input } from '@/widgets/ui/input'
 
+interface Attribute {
+  key: string
+  value: string
+}
 
-const entries = ref<{ key: string; value: string }[]>([]);
+const props = withDefaults(
+  defineProps<{
+    modelValue?: Attribute[]
+  }>(),
+  {
+    modelValue: () => [],
+  }
+)
 
-const store = useAppStore();
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: Attribute[]): void
+}>()
+
+const store = useAppStore()
 
 const attrOptions = ref<string[]>(["call_center_number", "phone_number"]);
+const entries = ref<Attribute[]>(JSON.parse(JSON.stringify(props.modelValue ?? [])))
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    entries.value = JSON.parse(JSON.stringify(newVal ?? []))
+  },
+  { deep: true }
+)
 
 function addRow() {
   entries.value.push({ key: '', value: '' })
+  emitUpdate()
 }
 
 function deleteRow(index: number) {
   entries.value.splice(index, 1)
+  emitUpdate()
 }
 
 function updateKey(index: number, value: string) {
   entries.value[index].key = value.trim().replace(/\s*,\s*/g, ',')
+  emitUpdate()
 }
 
 function updateValue(index: number, value: string) {
   entries.value[index].value = value
+  emitUpdate()
 }
 
-const fetchSettings = async () => {
-  if (!store.curProject) {
-    return;
-  }
-
-  try {
-    const res = await fetch(API_ENDPOINT + `/settings/${store.curProject}`);
-    const response = await res.json();
-    if (response.success && response.data) {
-      entries.value = Object.entries(response.data).map(([key, val]) => ({
-        key,
-        value: Array.isArray(val) ? val.join(',') : String(val ?? '')  // Join without spaces
-      }));
-    } else {
-      entries.value = [];
-    }
-  } catch (error) {
-    console.error("Error fetching settings:", error);
-  }
-};
+function emitUpdate() {
+  // deep clone to avoid proxy leaks
+  emit('update:modelValue', JSON.parse(JSON.stringify(entries.value)))
+}
 
 
 async function saveConfig() {
   if (!store.curProject) {
+    alert('No project selected')
     return
   }
 
   const payload = {
-    project: store.curProject,
     attributes: entries.value,
+    project: store.curProject,
   }
 
   try {
@@ -82,15 +94,6 @@ async function saveConfig() {
     toast.error('Error saving settings: ' + ((err as Error).message || 'Unknown error'))
   }
 }
-
-watch(() => store.curProject, () => {
-  fetchSettings();
-});
-
-onMounted(() => {
-  fetchSettings();
-});
-
 </script>
 
 <template>
@@ -105,17 +108,17 @@ onMounted(() => {
     </div>
 
     <div class="relative overflow-x-auto">
-      <Table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <TableHeader class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <TableRow>
-            <TableHead class="px-2 py-1 w-[250px]">Key</TableHead>
-            <TableHead class="px-2 py-1">Value</TableHead>
-            <TableHead class="px-2 py-1 w-[50px]">Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="(entry, index) in entries" :key="`row-${index}`">
-            <TableCell class="px-2 py-1">
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-2 py-1 w-[250px]">Key</th>
+            <th class="px-2 py-1">Value</th>
+            <th class="px-2 py-1 w-[50px]">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(entry, index) in entries" :key="`${index}-${entry.key || ''}`">
+            <td class="px-2 py-1">
               <Select v-if="attrOptions && attrOptions.length > 0" @change="updateKey(index, $event)"
                 :model-value="entry.key">
                 <SelectTrigger class="w-full">
@@ -128,22 +131,22 @@ onMounted(() => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <Input v-else type="text" v-model="entry.key" />
-            </TableCell>
-            <TableCell class="px-2 py-1">
-              <Input type="text" v-model="entry.value" />
-            </TableCell>
-            <TableCell class="px-2 py-1">
+              <Input v-else type="text" :value="entry.key" @change="updateKey(index, $event)" />
+            </td>
+            <td class="px-2 py-1">
+              <Input type="text" :value="entry.value" @change="updateValue(index, $event)" />
+            </td>
+            <td class="px-2 py-1">
               <Button type="button" variant="ghost" class="text-red-500" @click="() => deleteRow(index)">
                 <Icon name="Trash2" />
               </Button>
-            </TableCell>
-          </TableRow>
-          <TableRow v-if="entries.length === 0">
-            <TableCell class="px-2 py-4 text-center" colspan="3">No attributes. Use + to add.</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+            </td>
+          </tr>
+          <tr v-if="entries.length === 0">
+            <td class="px-2 py-4 text-center" colspan="3">No attributes. Use + to add.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
