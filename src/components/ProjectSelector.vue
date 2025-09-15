@@ -3,10 +3,8 @@ import { API_ENDPOINT } from "@/config";
 import { useAppStore } from "@/stores/app";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/widgets/ui/select";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 
 const store = useAppStore();
-const router = useRouter();
 const projectOptions = ref<{ id: string; name: string; }[]>([]);
 
 const fetchData = async () => {

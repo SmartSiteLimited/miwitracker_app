@@ -5,7 +5,7 @@ import { useAppStore } from '@/stores/app'
 import { Button } from '@/widgets/ui/button'
 import { Input } from '@/widgets/ui/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/widgets/ui/select'
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/widgets/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/widgets/ui/table'
 import { onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 

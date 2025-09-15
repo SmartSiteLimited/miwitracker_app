@@ -5,7 +5,6 @@ import Icon from '@/components/Icon.vue'
 import ImeisInput from '@/components/ImeisInput.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import TaskButton from '@/components/TaskButton.vue'
-import { Separator } from '@/widgets/ui/separator'
 import type { IRequestResponse } from '@/composables/backend'
 import { type Device } from '@/composables/device'
 import { API_ENDPOINT, API_IMEIS_ENDPOINT } from '@/config'
@@ -52,7 +51,7 @@ const displayImeis = computed(() => {
     }
   }
 
-  for (let [id, imeis] of filterTaskImeis.value.entries()) {
+  for (let [_, imeis] of filterTaskImeis.value.entries()) {
     founds = founds.filter(device => imeis.includes(device.imei))
   }
 
