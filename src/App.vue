@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useAppStore } from '@/stores/app'
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView } from 'vue-router'
 import { Toaster } from '@/widgets/ui/sonner'
 import 'vue-sonner/style.css'
 
 const store = useAppStore()
-const router = useRouter()
 
 store.initTheme()
 </script>
