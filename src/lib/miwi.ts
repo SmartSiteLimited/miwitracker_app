@@ -1,6 +1,6 @@
 import type { IRequestResponse } from "@/composables/backend"
 import { API_ENDPOINT } from "@/config"
-
+import { useAppStore } from "@/stores/app"
 export class MiwiBackend {
 
     public static checkOnlines(imeis: string[]): Promise<Map<string, boolean | null>> {
@@ -46,11 +46,13 @@ export class MiwiBackend {
 
     public static async setFallAlert(imeis: string[]): Promise<Map<string, boolean | null>> {
         const resultMap = new Map<string, boolean | null>()
+        const store = useAppStore()
+        const project = store.curProject
         imeis.forEach(imei => {
             resultMap.set(imei, null)
         })
         const requests = imeis.map(imei =>
-            MiwiBackend.request<boolean>("/devices/task/setfallalert/" + imei, {
+            MiwiBackend.request<boolean>("/devices/task/setfallalert/" + imei + "/" + project, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
