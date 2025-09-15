@@ -44,6 +44,26 @@ export class MiwiBackend {
         return resultMap
     }
 
+    public static async setFallAlert(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/setfallalert/" + imei, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+                }).catch((error) => {
+                    console.log(`Failed to set fall alert for ${imei}:`, error)
+                })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
     public static async setPhoneBook(imeis: string[]): Promise<Map<string, boolean | null>> {
         const resultMap = new Map<string, boolean | null>()
         imeis.forEach(imei => {
