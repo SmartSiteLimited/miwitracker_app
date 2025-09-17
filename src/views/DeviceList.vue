@@ -137,15 +137,12 @@ async function updateImeibyProject(storeProject: string | null, signal?: AbortSi
   if (storeProject === null) return;
 
   try {
-    const resp = await fetch(API_IMEIS_ENDPOINT, {
-      method: "POST",
+    const resp = await fetch(`${API_ENDPOINT}/devices/updateImeis/${storeProject}`, {
+      method: "GET",
       signal,
       headers: {
         "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        project: storeProject,
-      })
+      }
     })
 
     const response = await resp.json();
