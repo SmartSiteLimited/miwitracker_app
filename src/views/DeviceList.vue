@@ -7,7 +7,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import TaskButton from '@/components/TaskButton.vue'
 import type { IRequestResponse } from '@/composables/backend'
 import { type Device } from '@/composables/device'
-import { API_ENDPOINT, API_IMEIS_ENDPOINT } from '@/config'
+import { API_ENDPOINT } from '@/config'
 import { useAppStore } from '@/stores/app'
 import { useDeviceTaskStore } from '@/stores/devicetask'
 import { Checkbox } from '@/widgets/ui/checkbox'
@@ -34,7 +34,6 @@ const checkImeis = ref<Set<string>>(new Set())
 const filterImeis = ref<Set<string>>(new Set())
 const filterTaskImeis = ref<Map<string, string[]>>(new Map())
 const loading = ref(false)
-const fetchImeiList = ref<any[]>([])
 const keyword = ref('')
 const displayImeis = computed(() => {
   let founds = devices.value
@@ -133,40 +132,20 @@ function updateFilterResult(storeId: number, result: number) {
   }
 }
 
-async function updateImeibyProject(storeProject: string | null, signal?: AbortSignal) {
+async function fetchNewDevices(storeProject: string | null, signal?: AbortSignal) {
   if (storeProject === null) return;
 
+  let url = `${API_ENDPOINT}/devices/fetchNewDevices/` + (store.curProject || '')
   try {
-    const resp = await fetch(API_IMEIS_ENDPOINT, {
-      method: "POST",
+    const resp = await fetch(url, {
       signal,
       headers: {
         "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        project: storeProject,
-      })
+      }
     })
 
     const response = await resp.json();
-    if (response.success) {
-      const keys = Object.keys(response.data || {});
-      fetchImeiList.value = Array.from(new Set([...fetchImeiList.value, ...keys]));
-
-      // after fetch, update userImeis and fetchData
-      await fetch(API_ENDPOINT + `/devices/save/${storeProject}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        signal,
-        body: JSON.stringify({
-          imeis: fetchImeiList.value,
-        })
-      })
-
-      userImeis.value = new Set(fetchImeiList.value.map(String));
-
+    if (response && response.success) {
       fetchData();
     }
   } catch (error) {
@@ -247,7 +226,7 @@ onMounted(async () => {
           </TaskButton>
 
           <TaskButton v-if="store.curProject !== null" variant="outline"
-            :promise-func="(signal) => updateImeibyProject(store.curProject, signal)">
+            :promise-func="(signal) => fetchNewDevices(store.curProject, signal)">
             <Icon name="CloudDownload" />
             Fetch New Devices
           </TaskButton>

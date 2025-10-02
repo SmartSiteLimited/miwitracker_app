@@ -5,6 +5,8 @@ import Icon from '@/components/Icon.vue';
 import { Button } from '@/widgets/ui/button';
 
 const store = useAppStore();
+
+const app_version = import.meta.env.VITE_APP_VERSION;
 </script>
 
 <template>
@@ -20,7 +22,6 @@ const store = useAppStore();
       </div>
     </div>
     <div class="flex-1 space-y-4 p-8 pt-6">
-
       <RouterView v-slot="{ Component }">
         <main class="pb-10">
           <transition name="fade" mode="out-in">
@@ -28,6 +29,9 @@ const store = useAppStore();
           </transition>
         </main>
       </RouterView>
+
+      <hr>
+      <p class="text-center text-gray-300 dark:text-gray-600 text-xs">v{{ app_version }}</p>
     </div>
   </div>
 </template>
