@@ -135,7 +135,7 @@ function updateFilterResult(storeId: number, result: number) {
 async function fetchNewDevices(storeProject: string | null, signal?: AbortSignal) {
   if (storeProject === null) return;
 
-  let url = `${API_ENDPOINT}/devices/fetchNewDevices/` + (store.curProject || '')
+  let url = `${API_ENDPOINT}/devices/fetchNewDevices/${storeProject}`
   try {
     const resp = await fetch(url, {
       signal,

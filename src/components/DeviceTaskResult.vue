@@ -57,6 +57,10 @@ const props = defineProps<{
                 <span v-if="props.result === true" class="text-green-500">Success</span>
                 <span v-else-if="props.result === false" class="text-red-500">Failed to Reboot</span>
             </template>
+            <template v-if="props.taskName === 'set_fallalert'">
+                <span v-if="props.result === true" class="text-green-500">Success</span>
+                <span v-else-if="props.result === false" class="text-red-500">Cannot Set Fall Alert</span>
+            </template>
         </span>
     </div>
 </template>

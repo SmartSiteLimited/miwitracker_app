@@ -81,6 +81,9 @@ export const useDeviceTaskStore = (id: string) =>
                     if (taskName ==='poweroff') {
                         taskFns = await this.chunkTasks(MiwiBackend.PowerOff , imeis , batchSize)
                     }
+                    if (taskName ==='set_fallalert') {
+                        taskFns = await this.chunkTasks(MiwiBackend.setFallAlert , imeis , batchSize)
+                    }
                     await runSequentially(taskFns)
 
                 } catch (error) {

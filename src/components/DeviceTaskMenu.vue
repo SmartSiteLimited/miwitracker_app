@@ -80,6 +80,11 @@ const commandGroups = {
       "value": "set_callcenter",
       "text": "Set Call Center",
       "icon": "Headset"
+    },
+    {
+      "value": "set_fallalert",
+      "text": "Set Fall Alert",
+      "icon": "Siren"
     }
   ]
 }
