@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
   return {
     base: env.VITE_BASE_URL,
     server,
+    define: {
+      APP_VERSION: JSON.stringify(env.npm_package_version || '0.0.0'),
+    },
     plugins: [
       vue(),
       // vueDevTools(),

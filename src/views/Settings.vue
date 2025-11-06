@@ -17,7 +17,7 @@ const store = useAppStore();
 const attrOptions = ref<Record<string, string>>({
   "sos_phone_number": "SOS Phone Number",
   "call_center_number": "Call Center Number",
-  "sensitivity": "Sensitivity",
+  "sensitivity": "Fall Sensitivity",
 })
 
 function addRow() {
