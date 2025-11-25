@@ -85,6 +85,11 @@ const commandGroups = {
       "value": "set_fallalert",
       "text": "Set Fall Alert",
       "icon": "Siren"
+    },
+    {
+      "value": "off_fallalert",
+      "text": "Off Fall Alert",
+      "icon": "BellOff"
     }
   ]
 }

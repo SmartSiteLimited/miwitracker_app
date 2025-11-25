@@ -66,6 +66,29 @@ export class MiwiBackend {
         return resultMap
     }
 
+    public static async offFallAlert(imeis: string[]): Promise<Map<string, boolean | null>> {
+        const resultMap = new Map<string, boolean | null>()
+        const store = useAppStore()
+        const project = store.curProject
+        imeis.forEach(imei => {
+            resultMap.set(imei, null)
+        })
+        const requests = imeis.map(imei =>
+            MiwiBackend.request<boolean>("/devices/task/offfallalert/" + imei , {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            }).then((success) => {
+                resultMap.set(imei, success)
+            }).catch((error) => {
+                // Keep null value for failed requests
+                console.error(`Failed to turn off fall alert for ${imei}:`, error)
+            })
+        )
+
+        await Promise.all(requests)
+        return resultMap
+    }
+
     public static async setPhoneBook(imeis: string[]): Promise<Map<string, boolean | null>> {
         const resultMap = new Map<string, boolean | null>()
         imeis.forEach(imei => {
