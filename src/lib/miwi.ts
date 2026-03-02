@@ -33,7 +33,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to locate ${imei}:`, error)
@@ -78,7 +78,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to turn off fall alert for ${imei}:`, error)
@@ -100,7 +100,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to set phone book for ${imei}:`, error)
@@ -122,7 +122,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to set block phone for ${imei}:`, error)
@@ -143,8 +143,9 @@ export class MiwiBackend {
             MiwiBackend.request<boolean>("/devices/task/sethealth/" + imei, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-            }).then((success) => {
-                resultMap.set(imei, success)
+            }).then((result) => {
+                result ? resultMap.set(imei, true) : resultMap.set(imei, false)
+
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to set health for ${imei}:`, error)
@@ -166,7 +167,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to set SOS for ${imei}:`, error)
@@ -188,7 +189,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to set Call Center for ${imei}:`, error)
@@ -210,7 +211,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to reboot device ${imei}:`, error)
@@ -232,7 +233,7 @@ export class MiwiBackend {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             }).then((success) => {
-                resultMap.set(imei, success)
+                success ? resultMap.set(imei, true) : resultMap.set(imei, false)
             }).catch((error) => {
                 // Keep null value for failed requests
                 console.error(`Failed to power off device ${imei}:`, error)
