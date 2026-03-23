@@ -18,6 +18,7 @@ const attrOptions = ref<Record<string, string>>({
   "sos_phone_number": "SOS Phone Number",
   "call_center_number": "Call Center Number",
   "sensitivity": "Fall Sensitivity",
+  "gps_tracking_interval" : "GPS Tracking Interval (Minutes)",
 })
 
 function addRow() {
